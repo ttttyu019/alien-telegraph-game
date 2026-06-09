@@ -34,23 +34,15 @@
         }
 
         /* 星空背景 */
-        #game-container::before {
-            content: '';
+        .star {
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image: 
-                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
-                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
-                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
-                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
-                radial-gradient(2px 2px at 160px 30px, #ddd, transparent);
-            background-size: 200px 100px;
-            animation: twinkle 3s infinite;
-            z-index: 0;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
         }
 
         @keyframes twinkle {
-            0%, 100% { opacity: 0.8; }
+            0%, 100% { opacity: 0.3; }
             50% { opacity: 1; }
         }
 
@@ -75,13 +67,12 @@
             text-shadow: 0 0 10px #ffd700;
         }
 
-        /* 外星人容器 - 关键：旋转效果 */
+        /* ===== 外星人容器 ===== */
         #alien-container {
             width: 300px;
             height: 350px;
             margin: 10px auto;
             position: relative;
-            perspective: 800px;
             z-index: 5;
         }
 
@@ -89,61 +80,68 @@
             width: 100%;
             height: 100%;
             position: relative;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d;
         }
 
-        /* 背身状态 - 默认就是背身 */
+        /* 背面（背身 - 安全状态） */
         .alien-back {
-            width: 200px;
-            height: 280px;
-            background: linear-gradient(135deg, #00ff88 0%, #00cc66 50%, #009944 100%);
-            border-radius: 50% 50% 45% 45%;
             position: absolute;
+            width: 200px;
+            height: 260px;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%) rotateY(0deg);
+            backface-visibility: hidden;
+        }
+
+        .alien-back-body {
+            width: 200px;
+            height: 250px;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc66 50%, #009944 100%);
+            border-radius: 50% 50% 45% 45%;
+            position: relative;
             box-shadow: 
                 0 10px 30px rgba(0,255,136,0.3),
                 inset 0 -20px 40px rgba(0,0,0,0.2);
-            transition: all 0.6s ease;
         }
 
-        /* 背身上的细节 */
-        .alien-back::before {
+        /* 背身上的细节 - 显示这是背面 */
+        .alien-back-body::before {
             content: '';
             position: absolute;
-            top: 20%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 60px;
-            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        .alien-back::after {
-            content: '';
-            position: absolute;
-            bottom: 30%;
+            top: 15%;
             left: 50%;
             transform: translateX(-50%);
             width: 80px;
             height: 40px;
-            border: 3px solid rgba(255,255,255,0.3);
+            border: 3px solid rgba(255,255,255,0.2);
             border-radius: 50%;
-            border-top: none;
+            border-bottom: none;
+        }
+
+        .alien-back-body::after {
+            content: '';
+            position: absolute;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 15px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
         }
 
         /* 天线 - 从背后看 */
         .antenna-back {
             position: absolute;
-            top: -60px;
+            top: -70px;
             left: 50%;
             transform: translateX(-50%);
+            z-index: 10;
         }
 
-        .antenna-back .stick {
+        .antenna-stick {
             width: 4px;
             height: 60px;
             background: linear-gradient(to top, #00ff88, #00ffcc);
@@ -151,7 +149,7 @@
             border-radius: 2px;
         }
 
-        .antenna-back .tip {
+        .antenna-tip {
             width: 18px;
             height: 18px;
             background: radial-gradient(circle, #ff00ff 0%, #cc00cc 100%);
@@ -163,7 +161,7 @@
 
         @keyframes antennaGlow {
             0%, 100% { 
-                box-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff;
+                box-shadow: 0 0 20px #ff00ff;
                 transform: scale(1);
             }
             50% { 
@@ -172,20 +170,26 @@
             }
         }
 
-        /* 正面 - 默认隐藏 */
+        /* 正面（转身 - 危险状态） */
         .alien-front {
-            width: 200px;
-            height: 280px;
-            background: linear-gradient(135deg, #ff4444 0%, #cc0000 50%, #990000 100%);
-            border-radius: 50% 50% 45% 45%;
             position: absolute;
+            width: 200px;
+            height: 260px;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotateY(180deg);
+            backface-visibility: hidden;
+        }
+
+        .alien-front-body {
+            width: 200px;
+            height: 250px;
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 50%, #990000 100%);
+            border-radius: 50% 50% 45% 45%;
+            position: relative;
             box-shadow: 
                 0 10px 30px rgba(255,68,68,0.5),
                 inset 0 -20px 40px rgba(0,0,0,0.3);
-            opacity: 0;
             transition: all 0.6s ease;
         }
 
@@ -203,11 +207,11 @@
         }
 
         .alien-eye.left {
-            left: 20%;
+            left: 18%;
         }
 
         .alien-eye.right {
-            right: 20%;
+            right: 18%;
         }
 
         .alien-eye::after {
@@ -223,10 +227,10 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
-        /* 愤怒的眼睛 - 转身时 */
+        /* 愤怒的眼睛 */
         #alien.turned .alien-eye {
-            transform: translateY(-50%) scaleY(0.7);
             background: radial-gradient(circle, #ffcccc 0%, white 100%);
+            transform: translateY(-50%) scaleY(0.7);
         }
 
         #alien.turned .alien-eye::after {
@@ -242,13 +246,13 @@
             border-radius: 0 0 70px 70px;
             border-top: none;
             position: absolute;
-            bottom: 22%;
+            bottom: 20%;
             left: 50%;
             transform: translateX(-50%);
             transition: all 0.3s ease;
         }
 
-        /* 愤怒的嘴巴 - 转身时 */
+        /* 愤怒的嘴巴 */
         #alien.turned .alien-mouth {
             border-color: #ffcccc;
             border-radius: 70px 70px 0 0;
@@ -257,17 +261,18 @@
             height: 25px;
         }
 
-        /* 转身动画 - 关键！*/
+        /* 天线 - 正面 */
+        .antenna-front {
+            position: absolute;
+            top: -70px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        /* ===== 转身动画 ===== */
         #alien.turned {
             transform: rotateY(180deg);
-        }
-
-        #alien.turned .alien-front {
-            opacity: 1;
-        }
-
-        #alien.turned .alien-back {
-            opacity: 0;
         }
 
         /* 状态文字 */
@@ -303,9 +308,19 @@
         /* 提示文字 */
         #hint-text {
             text-align: center;
-            font-size: 16px;
-            color: rgba(255,255,255,0.6);
+            font-size: 18px;
+            color: rgba(255,255,255,0.8);
             margin: 5px 0;
+            position: relative;
+            z-index: 10;
+            font-weight: bold;
+        }
+
+        /* 方向指示器 */
+        #direction-indicator {
+            text-align: center;
+            font-size: 48px;
+            margin: 10px 0;
             position: relative;
             z-index: 10;
         }
@@ -536,6 +551,7 @@
             box-shadow: 0 0 10px #00ff88;
             animation: pulse 1.5s infinite;
             margin-right: 8px;
+            vertical-align: middle;
         }
 
         .danger-indicator {
@@ -547,6 +563,27 @@
             box-shadow: 0 0 10px #ff4444;
             animation: shake 0.5s infinite;
             margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        /* 外星人状态标签 */
+        #alien-status {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .status-safe {
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        .status-danger {
+            color: #ff4444;
+            text-shadow: 0 0 10px #ff4444;
         }
     </style>
 </head>
@@ -557,25 +594,33 @@
             <div id="score-display">🛰️ 卫星: <span id="satellite-count">0</span></div>
         </div>
 
+        <div id="alien-status">
+            <span class="status-safe">👀 外星人背对着你（安全）</span>
+        </div>
+
         <div id="alien-container">
             <div id="alien">
-                <!-- 背面（默认显示） -->
+                <!-- 背面（默认显示 - 背身） -->
                 <div class="alien-back">
-                    <div class="antenna-back">
-                        <div class="tip"></div>
-                        <div class="stick"></div>
+                    <div class="alien-back-body">
+                        <div class="antenna-back">
+                            <div class="antenna-tip"></div>
+                            <div class="antenna-stick"></div>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- 正面（转身时显示） -->
                 <div class="alien-front">
-                    <div class="antenna-back">
-                        <div class="tip"></div>
-                        <div class="stick"></div>
+                    <div class="alien-front-body">
+                        <div class="antenna-front">
+                            <div class="antenna-tip"></div>
+                            <div class="antenna-stick"></div>
+                        </div>
+                        <div class="alien-eye left"></div>
+                        <div class="alien-eye right"></div>
+                        <div class="alien-mouth"></div>
                     </div>
-                    <div class="alien-eye left"></div>
-                    <div class="alien-eye right"></div>
-                    <div class="alien-mouth"></div>
                 </div>
             </div>
         </div>
@@ -585,7 +630,7 @@
             准备开始...
         </div>
         
-        <div id="hint-text"></div>
+        <div id="hint-text">点击"开始游戏"按钮</div>
 
         <div id="combo-display">🔥 连击 x<span id="combo-count">0</span>!</div>
 
@@ -608,10 +653,10 @@
         <div id="tutorial-overlay">
             <div id="tutorial-content">
                 <h2>🌌 欢迎来到星际电报员！</h2>
-                <p>🛸 <strong>游戏规则（一二三木头人）：</strong></p>
-                <p>👀 <span class="highlight">外星人背身时（绿色）</span><br>→ 疯狂点击发送电报！</p>
-                <p>⚠️ <span class="danger-text">外星人转身时（红色）</span><br>→ 立即停止点击！</p>
-                <p>💡 如果被抓到，下一轮时间会缩短哦！</p>
+                <p>🎮 <strong>游戏玩法（一二三木头人）：</strong></p>
+                <p>👀 <span class="highlight">外星人背身时（绿色背景）</span><br>→ 你可以疯狂点击发送电报！</p>
+                <p>⚠️ <span class="danger-text">外星人转身时（红色背景）</span><br>→ 必须立即停止点击！</p>
+                <p>💡 如果被抓到，下一轮时间会缩短！</p>
                 <p>🎯 累积卫星，占领星球，征服宇宙！</p>
                 <br>
                 <p>📡 准备好成为最棒的星际电报员了吗？</p>
@@ -698,6 +743,7 @@
 
         // DOM元素
         const alien = document.getElementById('alien');
+        const alienStatus = document.getElementById('alien-status');
         const statusText = document.getElementById('status-text');
         const hintText = document.getElementById('hint-text');
         const messageDisplay = document.getElementById('message-display');
@@ -737,7 +783,8 @@
             alien.classList.remove('turned');
             statusText.innerHTML = '<span class="safe-indicator"></span>安全！快发报！';
             statusText.className = '';
-            hintText.textContent = '👀 外星人背对着你，抓紧时间！';
+            alienStatus.innerHTML = '<span class="status-safe">👀 外星人背对着你（安全）</span>';
+            hintText.textContent = '👀 外星人背身，抓紧时间点击！';
             hintText.style.color = '#00ff88';
             messageDisplay.textContent = `📡 ${gameState.currentMessage}`;
             telegramButton.disabled = false;
@@ -759,6 +806,7 @@
             alien.classList.add('turned');
             statusText.innerHTML = '<span class="danger-indicator"></span>危险！停止发送！';
             statusText.className = 'danger';
+            alienStatus.innerHTML = '<span class="status-danger">👁️ 外星人看着你（危险）</span>';
             hintText.textContent = '⚠️ 外星人转过身了！不要动！';
             hintText.style.color = '#ff4444';
             telegramButton.disabled = true;
