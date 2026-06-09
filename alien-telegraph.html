@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌌 星际电报员 - 外星人别回头！</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 600px;
+            height: 100vh;
+            max-height: 900px;
+            background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #game-container::before {
+            content: '⭐ ✨ 🌟 ⭐ ✨';
+            position: absolute;
+            top: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 20px;
+            animation: twinkle 2s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        #header {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            position: relative;
+            z-index: 10;
+        }
+
+        #header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px #00ffff;
+        }
+
+        #score-display {
+            font-size: 24px;
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffd700;
+        }
+
+        #alien-container {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        #alien {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: all 0.5s ease;
+        }
+
+        .alien-body {
+            width: 200px;
+            height: 250px;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%);
+            border-radius: 50% 50% 45% 45%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 10px 30px rgba(0,255,136,0.3);
+        }
+
+        .alien-antenna {
+            width: 4px;
+            height: 60px;
+            background: #00ff88;
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .alien-antenna::before {
+            content: '';
+            width: 15px;
+            height: 15px;
+            background: #ff00ff;
+            border-radius: 50%;
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px #ff00ff;
+            animation: glow 1.5s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px #ff00ff; }
+            50% { box-shadow: 0 0 40px #ff00ff, 0 0 60px #ff00ff; }
+        }
+
+        .alien-eye {
+            width: 50px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 40%;
+            transform: translateY(-50%);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .alien-eye.left {
+            left: 25%;
+        }
+
+        .alien-eye.right {
+            right: 25%;
+        }
+
+        .alien-eye::after {
+            content: '';
+            width: 25px;
+            height: 30px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .alien-mouth {
+            width: 60px;
+            height: 30px;
+            border: 4px solid white;
+            border-radius: 0 0 60px 60px;
+            border-top: none;
+            position: absolute;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #alien.turned .alien-body {
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            box-shadow: 0 10px 30px rgba(255,68,68,0.5);
+        }
+
+        #alien.turned .alien-eye {
+            transform: translateY(-50%) scaleY(0.3);
+        }
+
+        #alien.turned .alien-mouth {
+            border-color: white;
+            border-radius: 60px 60px 0 0;
+            border-bottom: none;
+            border-top: 4px solid white;
+        }
+
+        #status-text {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #00ff88;
+            margin: 20px 0;
+            text-shadow: 0 0 20px currentColor;
+            animation: pulse 1.5s infinite;
+        }
+
+        #status-text.danger {
+            color: #ff4444;
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        #message-display {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px;
+            color: white;
+            font-size: 18px;
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(0,255,255,0.3);
+        }
+
+        #telegram-button {
+            width: 250px;
+            height: 80px;
+            background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 10px 30px rgba(0,255,255,0.4);
+            transition: all 0.2s ease;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        #telegram-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,255,255,0.6);
+        }
+
+        #telegram-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        #telegram-button:disabled {
+            background: linear-gradient(135deg, #666 0%, #444 100%);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        #progress-container {
+            margin: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            border: 2px solid #ffd700;
+        }
+
+        #planet-name {
+            color: #ffd700;
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        #progress-bar {
+            width: 100%;
+            height: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700 0%, #ff8c00 100%);
+            border-radius: 15px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        #satellite-display {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 30px;
+            flex-wrap: wrap;
+        }
+
+        #combo-display {
+            text-align: center;
+            color: #ff00ff;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+            text-shadow: 0 0 20px #ff00ff;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #tutorial-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        #tutorial-content {
+            max-width: 500px;
+        }
+
+        #tutorial-content h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #00ffff;
+        }
+
+        #tutorial-content p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        #tutorial-button {
+            padding: 15px 40px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,255,136,0.4);
+        }
+
+        .penalty-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 68, 68, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        #game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        #final-score {
+            font-size: 48px;
+            color: #ffd700;
+            margin: 20px 0;
+            text-shadow: 0 0 30px #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="header">
+            <h1>🌌 星际电报员</h1>
+            <div id="score-display">🛰️ 卫星: <span id="satellite-count">0</span></div>
+        </div>
+
+        <div id="alien-container">
+            <div id="alien">
+                <div class="alien-body">
+                    <div class="alien-antenna"></div>
+                    <div class="alien-eye left"></div>
+                    <div class="alien-eye right"></div>
+                    <div class="alien-mouth"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="status-text">准备开始...</div>
+
+        <div id="combo-display">连击 x<span id="combo-count">0</span>!</div>
+
+        <div id="message-display">
+            点击"开始游戏"按钮开始你的星际通讯之旅！
+        </div>
+
+        <button id="telegram-button" disabled>
+            📡 发送电报
+        </button>
+
+        <div id="progress-container">
+            <div id="planet-name">🌍 地球轨道</div>
+            <div id="progress-bar">
+                <div id="progress-fill"></div>
+            </div>
+            <div id="satellite-display"></div>
+        </div>
+
+        <div id="tutorial-overlay">
+            <div id="tutorial-content">
+                <h2>🌌 欢迎来到星际电报员！</h2>
+                <p>🛸 <strong>游戏规则：</strong></p>
+                <p>1. 外星人背身时（绿色），疯狂点击发送电报！</p>
+                <p>2. 外星人转身时（红色），立即停止点击！</p>
+                <p>3. 如果被抓到，下一轮时间会缩短哦！</p>
+                <p>4. 累积卫星，占领星球，征服宇宙！</p>
+                <br>
+                <p>📡 准备好成为最棒的星际电报员了吗？</p>
+                <button id="tutorial-button" onclick="startGame()">开始游戏</button>
+            </div>
+        </div>
+
+        <div id="game-over">
+            <div id="tutorial-content">
+                <h2>🌌 游戏结束</h2>
+                <p>你成功占领了宇宙！</p>
+                <div id="final-score">最终得分: <span id="final-score-value">0</span></div>
+                <p>🛰️ 总卫星数: <span id="final-satellites">0</span></p>
+                <p>🔥 最高连击: <span id="final-combo">0</span></p>
+                <br>
+                <button id="tutorial-button" onclick="restartGame()">再来一次</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态
+        const gameState = {
+            isRunning: false,
+            isSafe: false,
+            satellites: 0,
+            combo: 0,
+            maxCombo: 0,
+            penaltyLevel: 0,
+            currentPlanet: 0,
+            telegramClicks: 0,
+            requiredClicks: 1,
+            currentMessage: '',
+            safeDuration: 5000,
+            dangerDuration: 1500,
+            tutorialStep: 0
+        };
+
+        // 星球配置
+        const planets = [
+            { name: '🌍 地球轨道', required: 5, emoji: '🌍' },
+            { name: '🌙 月球基地', required: 15, emoji: '🌙' },
+            { name: '🔴 火星殖民', required: 30, emoji: '🔴' },
+            { name: '🟤 木星系统', required: 50, emoji: '🟤' },
+            { name: '🪐 土星环', required: 80, emoji: '🪐' },
+            { name: '⭐ 银河系中心', required: 120, emoji: '⭐' },
+            { name: '🌌 宇宙霸主', required: 200, emoji: '🌌' }
+        ];
+
+        // 搞笑电报库
+        const telegramMessages = {
+            short: [
+                "Hi",
+                "你好",
+                "在吗",
+                "外星人你好",
+                "我是地球人",
+                "不要回头",
+                "我在这里",
+                "收到请回复",
+                "over",
+                "我是谁"
+            ],
+            medium: [
+                "外星人你的天线歪了",
+                "能不能别老回头啊",
+                "我是地球派来的使者",
+                "你们星球有Wi-Fi吗",
+                "我带了地球上的特产",
+                "外星人你饿不饿",
+                "你们老板凶不凶",
+                "能不能给我签个名",
+                "我其实是个机器人",
+                "你们加班吗"
+            ],
+            long: [
+                "尊敬的外星人总公司人力资源部负责人",
+                "我叫张三今年28岁想应聘外星人实习生",
+                "你们星球的房价贵不贵有没有住房公积金",
+                "外星人先生我能问你一个问题吗你愿意嫁到地球来吗",
+                "我朋友说看到UFO但我说是灯光反射他不相信"
+            ]
+        };
+
+        // DOM元素
+        const alien = document.getElementById('alien');
+        const statusText = document.getElementById('status-text');
+        const messageDisplay = document.getElementById('message-display');
+        const telegramButton = document.getElementById('telegram-button');
+        const satelliteCount = document.getElementById('satellite-count');
+        const progressFill = document.getElementById('progress-fill');
+        const planetName = document.getElementById('planet-name');
+        const satelliteDisplay = document.getElementById('satellite-display');
+        const comboDisplay = document.getElementById('combo-display');
+        const comboCount = document.getElementById('combo-count');
+        const tutorialOverlay = document.getElementById('tutorial-overlay');
+        const gameOverScreen = document.getElementById('game-over');
+
+        // 开始游戏
+        function startGame() {
+            tutorialOverlay.style.display = 'none';
+            gameState.isRunning = true;
+            gameState.tutorialStep = 1;
+            telegramButton.disabled = false;
+            nextRound();
+        }
+
+        // 下一轮
+        function nextRound() {
+            if (!gameState.isRunning) return;
+
+            // 重置状态
+            gameState.isSafe = true;
+            gameState.telegramClicks = 0;
+            
+            // 选择电报
+            const messageType = getRandomMessageType();
+            gameState.currentMessage = getRandomMessage(messageType);
+            gameState.requiredClicks = getRequiredClicks(messageType);
+            
+            // 更新UI
+            alien.classList.remove('turned');
+            statusText.textContent = '✅ 安全！快发报！';
+            statusText.className = '';
+            messageDisplay.textContent = `📡 ${gameState.currentMessage}`;
+            telegramButton.disabled = false;
+            telegramButton.textContent = `📡 发送电报 (0/${gameState.requiredClicks})`;
+
+            // 安全期
+            setTimeout(() => {
+                if (gameState.isSafe && gameState.isRunning) {
+                    turnAround();
+                }
+            }, gameState.safeDuration);
+        }
+
+        // 外星人转身
+        function turnAround() {
+            if (!gameState.isRunning) return;
+
+            gameState.isSafe = false;
+            alien.classList.add('turned');
+            statusText.textContent = '⚠️ 危险！停止发送！';
+            statusText.className = 'danger';
+            telegramButton.disabled = true;
+
+            // 危险期结束
+            setTimeout(() => {
+                if (gameState.isRunning) {
+                    // 检查是否在被抓状态下点击了
+                    nextRound();
+                }
+            }, gameState.dangerDuration);
+        }
+
+        // 发送电报（按钮点击）
+        telegramButton.addEventListener('click', () => {
+            if (!gameState.isSafe || !gameState.isRunning) {
+                // 在危险期点击了！
+                caught();
+                return;
+            }
+
+            gameState.telegramClicks++;
+            
+            if (gameState.telegramClicks >= gameState.requiredClicks) {
+                // 成功发送
+                sendSuccess();
+            } else {
+                // 更新按钮文本
+                telegramButton.textContent = `📡 发送中... (${gameState.telegramClicks}/${gameState.requiredClicks})`;
+            }
+        });
+
+        // 成功发送电报
+        function sendSuccess() {
+            // 增加卫星
+            let satellitesEarned = getSatellitesForMessage();
+            
+            // 连击加成
+            gameState.combo++;
+            if (gameState.combo > gameState.maxCombo) {
+                gameState.maxCombo = gameState.combo;
+            }
+            
+            let multiplier = 1;
+            if (gameState.combo >= 10) {
+                multiplier = 2.0;
+            } else if (gameState.combo >= 5) {
+                multiplier = 1.5;
+            } else if (gameState.combo >= 3) {
+                multiplier = 1.2;
+            }
+            
+            satellitesEarned = Math.floor(satellitesEarned * multiplier);
+            gameState.satellites += satellitesEarned;
+            
+            // 显示连击
+            if (gameState.combo >= 3) {
+                comboCount.textContent = gameState.combo;
+                comboDisplay.style.opacity = '1';
+                setTimeout(() => {
+                    comboDisplay.style.opacity = '0';
+                }, 1500);
+            }
+            
+            // 更新UI
+            updateUI();
+            
+            // 显示成功消息
+            messageDisplay.textContent = `✅ 发送成功！+${satellitesEarned}颗卫星`;
+            telegramButton.disabled = true;
+            
+            // 检查是否通关
+            if (gameState.currentPlanet >= planets.length - 1 && 
+                gameState.satellites >= planets[gameState.currentPlanet].required) {
+                gameWin();
+            }
+        }
+
+        // 被抓到
+        function caught() {
+            gameState.combo = 0;
+            gameState.penaltyLevel = Math.min(gameState.penaltyLevel + 1, 3);
+            
+            // 应用惩罚
+            applyPenalty();
+            
+            // 显示惩罚
+            showPenalty();
+            
+            // 更新按钮状态
+            telegramButton.disabled = true;
+            statusText.textContent = '❌ 被抓到了！';
+            statusText.className = 'danger';
+            
+            // 外星人生气动画
+            alien.style.transform = 'shake 0.5s';
+        }
+
+        // 应用惩罚
+        function applyPenalty() {
+            if (gameState.penaltyLevel === 1) {
+                gameState.safeDuration = Math.max(3000, gameState.safeDuration - 500);
+            } else if (gameState.penaltyLevel === 2) {
+                gameState.safeDuration = Math.max(3000, gameState.safeDuration - 1000);
+                gameState.dangerDuration = Math.min(3000, gameState.dangerDuration + 500);
+            } else if (gameState.penaltyLevel >= 3) {
+                gameState.safeDuration = Math.max(2000, gameState.safeDuration - 2000);
+                gameState.dangerDuration = Math.min(3000, gameState.dangerDuration + 500);
+            }
+        }
+
+        // 显示惩罚提示
+        function showPenalty() {
+            const penaltyTexts = ['', '轻微生气', '中度生气', '暴走模式'];
+            const penaltyColors = ['', '#ffaa00', '#ff6600', '#ff0000'];
+            
+            const indicator = document.createElement('div');
+            indicator.className = 'penalty-indicator';
+            indicator.textContent = `⚠️ 外星人${penaltyTexts[gameState.penaltyLevel]}!`;
+            indicator.style.background = penaltyColors[gameState.penaltyLevel];
+            
+            document.getElementById('game-container').appendChild(indicator);
+            
+            setTimeout(() => {
+                indicator.remove();
+            }, 2000);
+        }
+
+        // 更新UI
+        function updateUI() {
+            satelliteCount.textContent = gameState.satellites;
+            
+            // 更新星球进度
+            const planet = planets[gameState.currentPlanet];
+            const progress = Math.min(100, (gameState.satellites / planet.required) * 100);
+            progressFill.style.width = progress + '%';
+            planetName.textContent = `${planet.emoji} ${planet.name}`;
+            
+            // 更新卫星显示
+            updateSatelliteDisplay();
+            
+            // 检查是否升级
+            if (gameState.satellites >= planet.required && gameState.currentPlanet < planets.length - 1) {
+                gameState.currentPlanet++;
+                updateUI();
+            }
+        }
+
+        // 更新卫星显示
+        function updateSatelliteDisplay() {
+            satelliteDisplay.innerHTML = '';
+            const displayCount = Math.min(gameState.satellites, 10);
+            
+            for (let i = 0; i < displayCount; i++) {
+                const sat = document.createElement('span');
+                sat.textContent = '🛰️';
+                satelliteDisplay.appendChild(sat);
+            }
+            
+            if (gameState.satellites > 10) {
+                const more = document.createElement('span');
+                more.textContent = `+${gameState.satellites - 10}`;
+                more.style.color = '#ffd700';
+                more.style.fontSize = '20px';
+                satelliteDisplay.appendChild(more);
+            }
+        }
+
+        // 游戏胜利
+        function gameWin() {
+            gameState.isRunning = false;
+            telegramButton.disabled = true;
+            
+            document.getElementById('final-score-value').textContent = gameState.satellites;
+            document.getElementById('final-satellites').textContent = gameState.satellites;
+            document.getElementById('final-combo').textContent = gameState.maxCombo;
+            
+            gameOverScreen.style.display = 'flex';
+        }
+
+        // 重新开始
+        function restartGame() {
+            gameState.isRunning = false;
+            gameState.isSafe = false;
+            gameState.satellites = 0;
+            gameState.combo = 0;
+            gameState.maxCombo = 0;
+            gameState.penaltyLevel = 0;
+            gameState.currentPlanet = 0;
+            gameState.safeDuration = 5000;
+            gameState.dangerDuration = 1500;
+            
+            alien.classList.remove('turned');
+            gameOverScreen.style.display = 'none';
+            tutorialOverlay.style.display = 'flex';
+            
+            updateUI();
+        }
+
+        // 工具函数
+        function getRandomMessageType() {
+            const rand = Math.random();
+            if (rand < 0.4) return 'short';
+            if (rand < 0.7) return 'medium';
+            return 'long';
+        }
+
+        function getRandomMessage(type) {
+            const messages = telegramMessages[type];
+            return messages[Math.floor(Math.random() * messages.length)];
+        }
+
+        function getRequiredClicks(type) {
+            switch(type) {
+                case 'short': return 1;
+                case 'medium': return 3;
+                case 'long': return 5;
+            }
+        }
+
+        function getSatellitesForMessage() {
+            if (gameState.requiredClicks === 1) return 1;
+            if (gameState.requiredClicks === 3) return 3;
+            return 5;
+        }
+
+        // 初始化UI
+        updateUI();
+    </script>
+</body>
+</html>
